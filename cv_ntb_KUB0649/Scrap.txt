@@ -1,0 +1,58 @@
+vector<vector<Subject>> SubjectsInVecVecWithoutPrio(vector<Subject> subjects)
+{
+	vector<Subject> hlp0 = subjects;
+	vector<Subject> hlp1;
+	vector<Subject> hlp2;
+
+	vector<vector<Subject>> final;
+
+
+	int counter = 0;
+	int go = hlp0.size();
+
+
+	for (size_t i = 0; i < 5; i++)
+	{
+
+		if (!hlp2.empty())
+		{
+			hlp0 = hlp2;
+			hlp2.clear();
+		}
+		hlp1.push_back(hlp0[0]);
+		hlp0.erase(hlp0.begin());
+		while (!hlp0.empty())
+		{
+
+
+			if (hlp1[counter].finish < hlp0[0].start)
+			{
+				hlp1.push_back(hlp0[0]);
+				hlp0.erase(hlp0.begin());
+				counter++;
+			}
+			else
+			{
+				hlp2.push_back(hlp0[0]);
+				hlp0.erase(hlp0.begin());
+			}
+
+
+		}
+		final.insert(final.begin() + i, hlp1);
+		hlp1.clear();
+		counter = 0;
+		if (i == 4 && !hlp2.empty())
+		{
+			cout << endl;
+			cout << "Tieto predmety nevosli do rozvrhu: ";
+
+			for (size_t i = 0; i < hlp2.size(); i++)
+			{
+				printVec(hlp2);
+			}
+			cout << endl;
+		}
+	}
+	return final;
+}

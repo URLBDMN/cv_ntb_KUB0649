@@ -9,7 +9,7 @@
 
 using namespace std;
 
-
+#define Timetable pair<vector<vector<Subject>>, vector<Subject>>
 
 struct Subject
 {
@@ -33,7 +33,7 @@ struct Subject
 bool CheckSubjects(vector<Subject> subjects)
 {
 	bool valid = true;
-	for (int i = 0; i < subjects.size(); i++)
+	for (size_t i = 0; i < subjects.size(); i++)
 	{
 		if (subjects[i].finish < subjects[i].start || subjects[i].finish > 18 || subjects[i].start < 5)
 		{
@@ -69,7 +69,6 @@ void printVec(vector<Subject> subjects)
 
 }
 
-
 Subject AddPriority(Subject toAddPrio, int cnt_of_priorities, ...)
 {
 	vector<int> i_prio;
@@ -89,20 +88,19 @@ Subject AddPriority(Subject toAddPrio, int cnt_of_priorities, ...)
 	return toAddPrio;
 }
 
-pair<vector<vector<Subject>>, vector<Subject>> SubjectsInVecVecWithPrio(vector<Subject> subjects)
+Timetable SubjectsInVecVecWithPrio(vector<Subject> subjects)
 {
-	vector<vector<Subject>> final;
-	vector<Subject> hlp0 = subjects;
-	vector<Subject> hlp1;
+	vector<vector<Subject>> result1;
+	vector<Subject> result2;
+	Timetable result;
 
-	pair<vector<vector<Subject>>, vector<Subject>> result;
+	vector<Subject> hlp0 = subjects;
 
 	vector<Subject> Mon;
 	for (size_t i = 0; i < 5; i++)
 	{
-		final.push_back(Mon);
+		result1.push_back(Mon);
 	}
-
 
 	int counter = 0;
 	bool correct = false;
@@ -110,73 +108,65 @@ pair<vector<vector<Subject>>, vector<Subject>> SubjectsInVecVecWithPrio(vector<S
 	{
 		if (!hlp0[0].priority.empty())
 		{
+			correct = false;
 			for (size_t i = 0; i < hlp0[0].priority.size(); i++)
 			{
 				if (correct)
 				{
 					break;
 				}
-				if (final[hlp0[0].priority[i]].empty())
+				if (result1[hlp0[0].priority[i]].empty())
 				{
-					final[hlp0[0].priority[i]].push_back(hlp0[0]);
+					result1[hlp0[0].priority[i]].push_back(hlp0[0]);
 					hlp0.erase(hlp0.begin());
 					break;
 				}
 				else
 				{
-
-					for (size_t j = 0; j < final[hlp0[0].priority[i]].size(); j++)
+					if (hlp0[0].start > result1[hlp0[0].priority[i]][result1[hlp0[0].priority[i]].size() - 1].finish)
 					{
-						if (correct)
-						{
-							break;
-						}
-						if (hlp0[0].start >= final[hlp0[0].priority[i]][j].finish)
-						{
-							final[hlp0[0].priority[i]].push_back(hlp0[0]);
-							hlp0.erase(hlp0.begin());
-							correct = true;
-							break;
-						}
-						else
-						{
-							correct = false;
-						}
-
-
+						result1[hlp0[0].priority[i]].push_back(hlp0[0]);
+						hlp0.erase(hlp0.begin());
+						correct = true;
+						break;
 					}
-					if (!correct)
+					else if ((!correct) & (i == hlp0[0].priority.size() - 1))
 					{
-						for (size_t i = 0; i < final.size(); i++)
+						for (size_t i = 0; i < result1.size(); i++)
 						{
-							if (final[i].empty())
+							if (correct)
 							{
-								final[i].push_back(hlp0[0]);
+								break;
+							}
+							if (result1[i].empty())
+							{
+								result1[i].push_back(hlp0[0]);
 								hlp0.erase(hlp0.begin());
-								correct = true;
 								break;
 							}
 							else
 							{
-								if (correct)
+								if (result1[i][result1[i].size() - 1].finish < hlp0[0].start)
 								{
+									result1[i].push_back(hlp0[0]);
+									hlp0.erase(hlp0.begin());
+									correct = true;
 									break;
 								}
-								for (size_t j = 0; j < final[i].size(); j++)
+								if (i == result1.size() - 1)
 								{
-									if (final[i][j].finish <= hlp0[0].start)
-									{
-										final[i].push_back(hlp0[0]);
-										hlp0.erase(hlp0.begin());
-										correct = true;
-										break;
-									}
+									result2.push_back(hlp0[0]);
+									hlp0.erase(hlp0.begin());
+									correct = true;
+									break;
 
 								}
 							}
 
 						}
 					}
+
+					
 
 				}
 
@@ -188,30 +178,30 @@ pair<vector<vector<Subject>>, vector<Subject>> SubjectsInVecVecWithPrio(vector<S
 		{
 			correct = false;
 
-			for (size_t i = 0; i < final.size(); i++)
+			for (size_t i = 0; i < result1.size(); i++)
 			{
 				if (correct)
 				{
 					break;
 				}
-				if (final[i].empty())
+				if (result1[i].empty())
 				{
-					final[i].push_back(hlp0[0]);
+					result1[i].push_back(hlp0[0]);
 					hlp0.erase(hlp0.begin());
 					break;
 				}
 				else
 				{
-					if (final[i][final[i].size() - 1].finish < hlp0[0].start)
+					if (result1[i][result1[i].size() - 1].finish < hlp0[0].start)
 					{
-						final[i].push_back(hlp0[0]);
+						result1[i].push_back(hlp0[0]);
 						hlp0.erase(hlp0.begin());
 						correct = true;
 						break;
 					}
-					if (i == final.size() - 1)
+					if (i == result1.size() - 1)
 					{
-						hlp1.push_back(hlp0[0]);
+						result2.push_back(hlp0[0]);
 						hlp0.erase(hlp0.begin());
 						correct = true;
 						break;
@@ -222,69 +212,9 @@ pair<vector<vector<Subject>>, vector<Subject>> SubjectsInVecVecWithPrio(vector<S
 			}
 		}
 	}
-	result.first = final;
-	result.second = hlp1;
+	result.first = result1;
+	result.second = result2;
 	return result;
-}
-
-
-vector<vector<Subject>> SubjectsInVecVecWithoutPrio(vector<Subject> subjects)
-{
-	vector<Subject> hlp0 = subjects;
-	vector<Subject> hlp1;
-	vector<Subject> hlp2;
-
-	vector<vector<Subject>> final;
-
-
-	int counter = 0;
-	int go = hlp0.size();
-
-
-	for (size_t i = 0; i < 5; i++)
-	{
-
-		if (!hlp2.empty())
-		{
-			hlp0 = hlp2;
-			hlp2.clear();
-		}
-		hlp1.push_back(hlp0[0]);
-		hlp0.erase(hlp0.begin());
-		while (!hlp0.empty())
-		{
-
-
-			if (hlp1[counter].finish < hlp0[0].start)
-			{
-				hlp1.push_back(hlp0[0]);
-				hlp0.erase(hlp0.begin());
-				counter++;
-			}
-			else
-			{
-				hlp2.push_back(hlp0[0]);
-				hlp0.erase(hlp0.begin());
-			}
-
-
-		}
-		final.insert(final.begin() + i, hlp1);
-		hlp1.clear();
-		counter = 0;
-		if (i == 4 && !hlp2.empty())
-		{
-			cout << endl;
-			cout << "Tieto predmety nevosli do rozvrhu: ";
-
-			for (size_t i = 0; i < hlp2.size(); i++)
-			{
-				printVec(hlp2);
-			}
-			cout << endl;
-		}
-	}
-	return final;
 }
 
 vector<Subject> FillSubjects()
@@ -318,7 +248,7 @@ int SubjectByName(string name)
 		}
 	}
 
-
+	return -1;
 }
 
 int main(void)
@@ -326,24 +256,15 @@ int main(void)
 
 
 	vector<Subject> subjects = FillSubjects();
-	vector<vector<Subject>> final;
-	string school_days[5] = { "Pondelok", "Utorok", "Streda",
-		"Stvrtok","Piatok" };
-	vector<int> j;
+	Timetable final;
+	string school_days[5] = { "Pondelok", "Utorok", "Streda","Stvrtok","Piatok" };
+	vector<Subject> SpareSubjects;
 
-	for (size_t i = 0; i < j.size(); i++)
-	{
-		cout << "a";
-	}
 
 	if (!CheckSubjects(subjects))
 	{
 		exit(1);
 	}
-
-	cout << "\nPredmety: ";
-	printVec(subjects);
-	cout << endl;
 
 	sort(subjects.begin(), subjects.end(), myComparison);
 
@@ -352,11 +273,12 @@ int main(void)
 
 
 	subjects[SubjectByName("APPS")] = AddPriority(subjects[SubjectByName("APPS")], 2, 2, 3);
-	subjects[SubjectByName("ANJ")] = AddPriority(subjects[SubjectByName("ANJ")], 2, 2, 3);
+	subjects[SubjectByName("ALG")] = AddPriority(subjects[SubjectByName("ALG")], 2, 2, 3);
+	subjects[SubjectByName("SJL")] = AddPriority(subjects[SubjectByName("SJL")], 2, 2, 3);
 
 
-
-	final = SubjectsInVecVecWithPrio(subjects).first;
+	cout << endl;
+	final = SubjectsInVecVecWithPrio(subjects);
 	cout << endl;
 
 
@@ -365,10 +287,14 @@ int main(void)
 	for (size_t i = 0; i < (sizeof(school_days) / sizeof(*school_days)); i++)
 	{
 		cout << school_days[i] << ": ";
-		printVec(final[i]);
+		printVec(final.first[i]);
 		cout << endl;
 
 	}
+
+	cout << "\nPredmety, ktore sa nevosli do rozvrhu: ";
+	printVec(final.second);
+	cout << endl;
 
 
 	return 0;
